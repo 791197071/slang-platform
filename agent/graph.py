@@ -97,40 +97,27 @@ def node_reflect_quality(state: AgentState) -> AgentState:
     return {**state, "quality_score": score}
 
 
-# ── 节点：构建响应 HTML ────────────────────────────────────
+# ── 节点：构建响应 ────────────────────────────────────
 def node_build_response(state: AgentState) -> AgentState:
-    from agent.tools import render_word_card, render_not_found, render_ai_text
-
-    intent    = state.get("intent", "lookup")
-    word_data = state.get("word_data")
-    ai_content = state.get("ai_content")
-    word      = state.get("current_word", "")
+    """建立 ui_html 摘要。FastAPI 模式下由 api.py 自行渲染 HTML。"""
+    intent = state.get("intent", "lookup")
+    word = state.get("current_word", "")
 
     if intent == "lookup":
-        if word_data:
-            html = render_word_card(word_data)
-        elif ai_content:
-            html = render_ai_text(word, ai_content)
+        if state.get("word_data"):
+            html = f'[OK] {word}'
+        elif state.get("ai_content"):
+            html = f'[AI] {word}'
         else:
-            html = render_not_found(word)
-
+            html = f'[NF] {word}'
     elif intent == "recommend":
-        last = state.get("last_word", "")
-        recs = state.get("recommendations", [])
-        if recs:
-            cards = "".join(render_word_card(r) for r in recs[:3])
-            html = f'<div class="rec-header">相关词推荐 · 基于「{last}」</div>' + cards
-        else:
-            html = '<div class="display-placeholder"><div class="placeholder-title">暂无相关词，换个词试试～</div></div>'
-
+        html = f'[REC] {word}'
     elif intent == "challenge":
-        html = '<div class="display-placeholder"><div class="placeholder-icon">🎯</div><div class="placeholder-title">请切换到「主题闯关」Tab 开始！</div></div>'
-
+        html = f'[CH] {word}'
     elif intent == "feedback":
-        html = '<div class="display-placeholder"><div class="placeholder-icon">💜</div><div class="placeholder-title">谢谢你的反馈，我会继续加油的！</div></div>'
-
+        html = '[FB] ok'
     else:
-        html = '<div class="display-placeholder"><div class="placeholder-title">学姐暂时没看懂，直接输入一个网络用语试试吧～</div></div>'
+        html = f'[??] {word}'
 
     return {**state, "ui_html": html}
 

@@ -1,0 +1,24 @@
+<table class="ant-table">
+  <thead>
+    <tr><th style="width:100px">词语</th><th style="width:90px">状态</th><th style="width:70px">质量分</th><th style="width:70px">来源</th><th style="width:80px">查询次数</th></tr>
+  </thead>
+  <tbody>
+    {% if rows %}
+    {% for row in rows %}
+    <tr onclick="
+        document.querySelectorAll('#admin-table-wrap tr').forEach(r=>r.classList.remove('selected'));
+        this.classList.add('selected');
+        htmx.ajax('GET', '/api/admin/edit-form?word={{ row[0] | urlencode }}', '#edit-panel');
+      " style="cursor:pointer">
+      <td style="font-weight:500">{{ row[0] }}</td>
+      <td>{{ row[1] }}</td>
+      <td style="font-variant-numeric:tabular-nums">{{ row[2] }}</td>
+      <td>{{ row[3] }}</td>
+      <td>{{ row[4] }}</td>
+    </tr>
+    {% endfor %}
+    {% else %}
+    <tr><td colspan="5" style="text-align:center;color:rgba(0,0,0,.35);padding:24px">暂无数据</td></tr>
+    {% endif %}
+  </tbody>
+</table>

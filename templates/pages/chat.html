@@ -1,0 +1,52 @@
+<!-- CHAT PAGE -->
+<div class="chat-page">
+  <!-- LEFT: search + scenarios -->
+  <div class="chat-left">
+    <!-- Search bar -->
+    <div class="chat-search">
+      <input type="text" name="user_input" id="word-input" class="ant-input"
+             placeholder="输入网络用语，回车或点发送" autocomplete="off"
+             hx-post="/api/chat/lookup"
+             hx-include="#last-word"
+             hx-target="#word-result"
+             hx-swap="innerHTML"
+             hx-trigger="keydown[key=='Enter']"
+             hx-indicator="#loading-overlay">
+      <button id="send-btn" class="ant-btn ant-btn-primary"
+              hx-post="/api/chat/lookup"
+              hx-include="#word-input, #last-word"
+              hx-target="#word-result"
+              hx-swap="innerHTML"
+              hx-indicator="#loading-overlay">
+        🔍 发送
+      </button>
+    </div>
+    <input type="hidden" id="last-word" name="last_word" value="">
+    <!-- Results -->
+    <div id="word-result" class="chat-result">
+      <div class="placeholder" style="padding:48px 16px">
+        <div class="placeholder-icon">💬</div>
+        <div class="placeholder-title">输入网络用语，开始学习</div>
+        <div class="placeholder-desc">场景对话将在这里展示</div>
+        <div class="placeholder-examples">破防了 · 内卷 · YYDS · 社死 · 摆烂</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: word detail -->
+  <div class="chat-right">
+    <div id="word-detail">
+      <div class="placeholder" style="padding:48px">
+        <div class="placeholder-icon">📋</div>
+        <div class="placeholder-title">词义详解</div>
+        <div class="placeholder-desc" style="text-align:left;max-width:200px;margin:0 auto">
+          查询后这里将展示：<br>
+          📖 &nbsp;词义详解<br>
+          📅 &nbsp;网络出现时间<br>
+          💡 &nbsp;使用贴士<br>
+          🔗 &nbsp;相关词汇
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

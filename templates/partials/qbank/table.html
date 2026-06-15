@@ -1,0 +1,39 @@
+<table class="ant-table">
+  <thead>
+    <tr><th>词语</th><th>词义</th><th>质量分</th><th style="width:100px">题库状态</th></tr>
+  </thead>
+  <tbody>
+    {% if rows %}
+    {% for row in rows %}
+    <tr>
+      <td style="font-weight:500">{{ row[0] }}</td>
+      <td style="color:rgba(0,0,0,.65)">{{ row[1] }}</td>
+      <td style="font-variant-numeric:tabular-nums">{{ row[2] }}</td>
+      <td>
+        {% if row[3] == '✅ 在题库' %}
+        <button class="ant-btn ant-btn-default ant-btn-sm"
+                hx-post="/api/qbank/remove"
+                hx-vals='{"word":"{{ row[0] }}"}'
+                hx-target="#qb-op-msg"
+                hx-swap="innerHTML"
+                hx-on::after-request="htmx.ajax('GET', '/api/qbank/table?search='+encodeURIComponent(document.querySelector('[name=search]')?.value||'')+'&filter_mode='+encodeURIComponent(document.querySelector('[name=filter_mode]')?.value||'全部'), '#qb-table-wrap')">
+          移出
+        </button>
+        {% else %}
+        <button class="ant-btn ant-btn-primary ant-btn-sm"
+                hx-post="/api/qbank/add"
+                hx-vals='{"word":"{{ row[0] }}"}'
+                hx-target="#qb-op-msg"
+                hx-swap="innerHTML"
+                hx-on::after-request="htmx.ajax('GET', '/api/qbank/table?search='+encodeURIComponent(document.querySelector('[name=search]')?.value||'')+'&filter_mode='+encodeURIComponent(document.querySelector('[name=filter_mode]')?.value||'全部'), '#qb-table-wrap')">
+          加入
+        </button>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    {% else %}
+    <tr><td colspan="4" style="text-align:center;color:rgba(0,0,0,.35);padding:24px">暂无数据</td></tr>
+    {% endif %}
+  </tbody>
+</table>

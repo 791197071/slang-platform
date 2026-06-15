@@ -1,0 +1,52 @@
+<div id="edit-form-content">
+  <div class="flex-between mb-3">
+    <span style="font-size:14px;font-weight:600;color:rgba(0,0,0,.88)">
+      {% if word %}✏️ 编辑：{{ word }}{% else %}← 点击表格行选择词条{% endif %}
+    </span>
+  </div>
+  <input type="hidden" id="edit-word" name="word" value="{{ word }}">
+
+  <div class="form-group">
+    <label class="form-label">词义</label>
+    <textarea id="edit-meaning" name="meaning" class="ant-input" rows="2">{{ meaning }}</textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">使用贴士</label>
+    <input type="text" id="edit-tips" name="use_tips" class="ant-input" value="{{ tips }}">
+  </div>
+  <div class="form-group">
+    <label class="form-label">场景 JSON</label>
+    <textarea id="edit-scenarios" name="scenarios_json" class="ant-input" rows="6"
+              style="font-family:'JetBrains Mono','Fira Code',monospace;font-size:12px">{{ scenarios }}</textarea>
+  </div>
+
+  <!-- 审核状态 + 保存按钮 同行 -->
+  <div class="form-row" style="align-items:flex-end">
+    <div class="form-group" style="flex:1;margin-bottom:0">
+      <label class="form-label">审核状态</label>
+      <div class="custom-select" id="edit-status-select" data-name="status">
+        <div class="custom-select-trigger">
+          {% if status == 'approved' %}✅ 已审核
+          {% elif status == 'pending' %}⏳ 待审核
+          {% else %}❌ 已拒绝{% endif %}
+        </div>
+        <div class="custom-select-dropdown">
+          <div class="custom-select-option {% if status == 'approved' %}selected{% endif %}" data-value="approved">✅ 已审核</div>
+          <div class="custom-select-option {% if status == 'pending' %}selected{% endif %}" data-value="pending">⏳ 待审核</div>
+          <div class="custom-select-option {% if status == 'rejected' %}selected{% endif %}" data-value="rejected">❌ 已拒绝</div>
+        </div>
+        <input type="hidden" id="edit-status" name="status" value="{{ status }}">
+      </div>
+    </div>
+    <div class="form-group" style="flex:1;margin-bottom:0">
+      <button class="ant-btn ant-btn-primary ant-btn-block"
+              hx-post="/api/admin/save"
+              hx-include="#edit-word, #edit-meaning, #edit-tips, #edit-scenarios, #edit-status"
+              hx-target="#admin-save-msg"
+              hx-swap="innerHTML">
+        💾 保存词条
+      </button>
+    </div>
+  </div>
+  <div id="admin-save-msg" class="mt-3"></div>
+</div>

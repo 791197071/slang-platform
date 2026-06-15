@@ -23,7 +23,7 @@
 
 ## 技术方案
 
-- 前端界面：`Gradio`
+- 前端界面：`FastAPI` + `Jinja2` 模板
 - 智能体编排：`LangGraph`
 - LLM 调用：`langchain` / `langchain-openai` / `openai`
 - 本地存储：`SQLite`
@@ -50,8 +50,13 @@ slang_platform/
 │  └─ slang_dict.json # 内置网络用语词库
 ├─ db/
 │  └─ database.py     # SQLite 初始化与读写
-├─ app.py             # Gradio 应用入口
+├─ routes/            # FastAPI 路由（页面 + API）
+├─ static/            # 静态资源
+├─ templates/         # Jinja2 HTML 模板
+├─ main.py            # FastAPI 应用入口
 ├─ config.py          # 配置加载
+├─ start.sh           # 一键启动脚本（Mac/Linux）
+├─ start.bat          # 一键启动脚本（Windows）
 ├─ requirements.txt   # Python 依赖
 └─ README.md
 ```
@@ -64,24 +69,39 @@ slang_platform/
 - Windows / macOS / Linux 均可运行
 - 如需 AI 生成功能，需要可用的 DeepSeek API Key
 
-### 2. 安装依赖
+### 2. 一键启动（推荐）
 
-在项目根目录执行：
+项目提供了启动脚本，会自动创建虚拟环境、安装依赖并运行，**无需手动配置环境**。
+
+**Mac / Linux：**
+
+```bash
+bash start.sh
+```
+
+**Windows：**
+
+双击运行 `start.bat`，或在命令提示符中执行：
+
+```bat
+start.bat
+```
+
+首次运行会自动安装依赖，需要几分钟，之后再启动就很快。
+
+### 3. 手动启动（熟悉 Python 的用户）
 
 ```bash
 pip install -r requirements.txt
+python main.py
 ```
 
-### 3. 启动项目
+### 4. 访问应用
 
-```bash
-python app.py
-```
-
-启动后默认监听：
+启动成功后，在浏览器打开：
 
 ```text
-http://localhost:7860
+http://127.0.0.1:8000
 ```
 
 程序首次运行时会自动完成以下操作：
@@ -142,11 +162,15 @@ http://localhost:7860
 - 支持点赞和点踩反馈
 - 词条内容包含含义、情绪、场景对话、使用贴士和相关词
 
-### 主题闯关
+![聊天学习](static/screenshots/聊天学习.png)
+
+### 闯关答题
 
 - 提供职场黑话、恋爱俚语、饭圈用语、情绪表达、日常搞笑等主题
 - 每组默认 5 题
 - 通过对话场景选择正确网络用语
+
+![闯关答题](static/screenshots/答题闯关.png)
 
 ### 我的进度
 
@@ -155,11 +179,20 @@ http://localhost:7860
 - 展示最近学习记录
 - 展示 AI 词条和待审核词条数量
 
-### 知识库管理
+### 题库管理
+
+- 搜索词条并一键加入/移出题库
+- 展示词义摘要和质量分
+
+![题库管理](static/screenshots/题库管理.png)
+
+### 词库管理
 
 - 可搜索和筛选词条
 - 可编辑释义、使用贴士和场景 JSON
 - 可设置审核状态：`approved`、`pending`、`rejected`
+
+![词库管理](static/screenshots/词库管理.png)
 
 ### 系统设置
 
@@ -197,13 +230,11 @@ http://localhost:7860
 
 ## 快速开始总结
 
-如果你只是想先跑起来，最短路径如下：
+如果你只是想先跑起来：
 
-```bash
-pip install -r requirements.txt
-python app.py
-```
+- **Mac / Linux**：终端执行 `bash start.sh`
+- **Windows**：双击 `start.bat`
 
-然后打开浏览器访问 `http://localhost:7860`。
+等脚本完成后，浏览器访问 `http://127.0.0.1:8000` 即可。
 
-如果你希望启用 AI 生成能力，再到“系统设置”页填写 DeepSeek API 配置即可。
+如果你希望启用 AI 生成能力，再到”系统设置”页填写 DeepSeek API 配置即可。

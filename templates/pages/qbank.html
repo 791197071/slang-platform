@@ -1,0 +1,40 @@
+<!-- QBANK PAGE (题库管理) -->
+<div class="page-scroll">
+  <div class="flex-between mb-3">
+    <div>
+      <h1 class="page-title">📝 题库管理</h1>
+      <p class="page-desc">管理参与闯关的词条——点击开关即可加入/移出题库</p>
+    </div>
+    <span class="text-muted text-sm">共 <strong id="qb-total" style="color:#1677ff">-</strong> 个词条在题库中</span>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <input type="text" name="search" class="ant-input"
+           placeholder="🔍 搜索词条…"
+           hx-get="/api/qbank/table"
+           hx-include="[name='filter_mode']"
+           hx-target="#qb-table-wrap"
+           hx-trigger="keyup changed delay:300ms">
+    <input type="hidden" name="filter_mode" value="全部">
+    <div class="custom-select filter-select" style="min-width:120px" data-name="filter_mode"
+         data-htmx-get="/api/qbank/table" data-htmx-target="#qb-table-wrap" data-htmx-include="[name='search']">
+      <div class="custom-select-trigger">全部</div>
+      <div class="custom-select-dropdown">
+        <div class="custom-select-option selected" data-value="全部">全部</div>
+        <div class="custom-select-option" data-value="在题库">在题库</div>
+        <div class="custom-select-option" data-value="未入库">未入库</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div id="qb-table-wrap" class="table-wrap" style="margin-bottom:12px"
+       hx-get="/api/qbank/table" hx-trigger="load" hx-swap="innerHTML">
+    <table class="ant-table">
+      <thead><tr><th>词语</th><th>词义</th><th>质量分</th><th style="width:100px">题库状态</th></tr></thead>
+      <tbody><tr><td colspan="4" style="text-align:center;color:rgba(0,0,0,.35);padding:32px">加载中…</td></tr></tbody>
+    </table>
+  </div>
+  <div id="qb-op-msg"></div>
+</div>

@@ -1,0 +1,58 @@
+<!-- ADMIN PAGE (词库管理) -->
+<div class="admin-page">
+  <!-- LEFT: table -->
+  <div class="admin-left">
+    <div class="admin-toolbar">
+      <input type="text" name="search" class="ant-input"
+             placeholder="🔍 搜索词语…"
+             hx-get="/api/admin/table"
+             hx-include="[name='status_filter']"
+             hx-target="#admin-table-wrap"
+             hx-trigger="keyup changed delay:300ms">
+      <input type="hidden" name="status_filter" value="全部">
+      <div class="custom-select filter-select" style="min-width:120px" data-name="status_filter"
+           data-htmx-get="/api/admin/table" data-htmx-target="#admin-table-wrap" data-htmx-include="[name='search']">
+        <div class="custom-select-trigger">📋 全部</div>
+        <div class="custom-select-dropdown">
+          <div class="custom-select-option selected" data-value="全部">📋 全部</div>
+          <div class="custom-select-option" data-value="已审核">✅ 已审核</div>
+          <div class="custom-select-option" data-value="待审核">⏳ 待审核</div>
+          <div class="custom-select-option" data-value="AI生成">🤖 AI生成</div>
+        </div>
+      </div>
+      <button class="ant-btn ant-btn-default ant-btn-sm"
+              hx-get="/api/admin/table"
+              hx-include="[name='search'], [name='status_filter']"
+              hx-target="#admin-table-wrap">
+        ↺
+      </button>
+    </div>
+    <div id="admin-table-wrap" class="table-wrap"
+         hx-get="/api/admin/table" hx-trigger="load" hx-swap="innerHTML">
+      <table class="ant-table">
+        <thead><tr><th>词语</th><th>状态</th><th>质量分</th><th>来源</th><th>查询次数</th></tr></thead>
+        <tbody><tr><td colspan="5" style="text-align:center;color:rgba(0,0,0,.35);padding:32px">加载中…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT: edit panel -->
+  <div class="admin-right">
+    <div class="edit-card" id="edit-panel"
+         hx-get="/api/admin/edit-form" hx-trigger="load" hx-swap="innerHTML">
+      <div style="text-align:center;color:rgba(0,0,0,.25);padding:40px 16px">
+        <div style="font-size:32px;margin-bottom:8px">✏️</div>
+        <div style="font-size:13px">点击左侧词语进行编辑</div>
+      </div>
+    </div>
+
+    <div class="admin-hint mt-3">
+      <b>📋 状态说明</b>
+      ✅ approved — 正常展示<br>
+      ⏳ pending  — AI 生成，待审核<br>
+      ❌ rejected — 隐藏，不展示<br>
+      <b style="margin-top:8px">⭐ 质量分</b>
+      👍 点赞 +0.5 · 👎 踩 −0.3 · 影响闯关优先级
+    </div>
+  </div>
+</div>

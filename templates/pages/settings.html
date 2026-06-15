@@ -1,0 +1,58 @@
+<!-- SETTINGS PAGE -->
+<div class="page-scroll">
+  <p class="sec-lbl">API 配置与学习参数</p>
+
+  <!-- API Config -->
+  <div class="ant-card">
+    <div class="ant-card-head-title">🔑 DeepSeek API 配置</div>
+    <div class="form-group">
+      <label class="form-label">API Key</label>
+      <input type="password" name="api_key" class="ant-input"
+             placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+             value="{{ api_key }}">
+      <span class="form-hint">在 platform.deepseek.com 获取</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Base URL</label>
+      <input type="text" name="base_url" class="ant-input"
+             value="{{ base_url }}">
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">生成模型</label>
+        <select name="main_model" class="ant-select">
+          <option value="deepseek-chat" {{ 'selected' if main_model == 'deepseek-chat' else '' }}>deepseek-chat</option>
+          <option value="deepseek-v3" {{ 'selected' if main_model == 'deepseek-v3' else '' }}>deepseek-v3</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">反思模型</label>
+        <select name="reflect_model" class="ant-select">
+          <option value="deepseek-reasoner" {{ 'selected' if reflect_model == 'deepseek-reasoner' else '' }}>deepseek-reasoner</option>
+          <option value="deepseek-r1" {{ 'selected' if reflect_model == 'deepseek-r1' else '' }}>deepseek-r1</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Learning Config -->
+  <div class="ant-card">
+    <div class="ant-card-head-title">📊 学习参数</div>
+    <div class="form-group">
+      <label class="form-label">质量阈值（低于此分时重新生成）：<strong style="color:#1677ff">{{ "%.1f"|format(threshold) }}</strong></label>
+      <input type="range" name="threshold" min="5.0" max="9.5" step="0.5"
+             value="{{ threshold }}"
+             oninput="this.previousElementSibling.querySelector('strong').textContent = parseFloat(this.value).toFixed(1)"
+             style="margin-top:4px">
+    </div>
+  </div>
+
+  <button class="ant-btn ant-btn-primary ant-btn-lg ant-btn-block"
+          hx-post="/api/settings/save"
+          hx-include="[name='api_key'], [name='base_url'], [name='main_model'], [name='reflect_model'], [name='threshold']"
+          hx-target="#settings-msg"
+          hx-swap="innerHTML">
+    💾 保存设置
+  </button>
+  <div id="settings-msg" class="mt-3"></div>
+</div>

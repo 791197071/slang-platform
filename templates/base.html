@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>梗导师 · 网络用语学习平台</title>
+<link rel="stylesheet" href="/static/css/antd.css">
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+// 自定义下拉组件
+document.addEventListener('click', function(e) {
+  // 关闭非当前下拉
+  document.querySelectorAll('.custom-select.open').forEach(function(cs) {
+    if (!cs.contains(e.target)) cs.classList.remove('open');
+  });
+  // 触发器点击
+  var trigger = e.target.closest('.custom-select-trigger');
+  if (trigger) { trigger.parentElement.classList.toggle('open'); return; }
+  // 选项点击
+  var option = e.target.closest('.custom-select-option');
+  if (option) {
+    var cs = option.closest('.custom-select');
+    var triggerEl = cs.querySelector('.custom-select-trigger');
+    var value = option.getAttribute('data-value');
+    // 更新隐藏 input（先在组件内找，再按 name 匹配）
+    var input = cs.querySelector('input[type="hidden"]');
+    if (!input) {
+      var name = cs.getAttribute('data-name');
+      if (name) input = document.querySelector('input[type="hidden"][name="'+name+'"]');
+    }
+    if (input) input.value = value;
+    // 更新触发器文字
+    triggerEl.innerHTML = option.innerHTML;
+    // 标记选中
+    cs.querySelectorAll('.custom-select-option').forEach(function(o){o.classList.remove('selected')});
+    option.classList.add('selected');
+    cs.classList.remove('open');
+    // 如果有 htmx 属性，触发请求
+    var hxGet = cs.getAttribute('data-htmx-get');
+    if (hxGet) {
+      var target = cs.getAttribute('data-htmx-target');
+      var include = cs.getAttribute('data-htmx-include') || '';
+      var params = (cs.getAttribute('data-name')||'filter')+'='+encodeURIComponent(value);
+      // 附加 include 的字段
+      if (include) {
+        var el = document.querySelector(include);
+        if (el) params += '&'+el.getAttribute('name')+'='+encodeURIComponent(el.value);
+      }
+      var url = hxGet + '?' + params;
+      htmx.ajax('GET', url, target);
+    }
+  }
+});
+</script>
+</head>
+<body>
+<div class="app-row">
+  <!-- SIDEBAR -->
+  <aside class="sidebar-col">
+    <div class="sb-logo">
+      <span class="sb-icon">🎓</span>
+      <div>
+        <div class="sb-title">梗导师</div>
+        <div class="sb-sub">网络用语学习平台</div>
+      </div>
+    </div>
+    <div class="sb-sep">学习</div>
+    <nav class="side-nav">
+      <a href="/chat" class="{{ 'active' if active_page == 'chat' else '' }}">💬 聊天学习</a>
+      <a href="/challenge" class="{{ 'active' if active_page == 'challenge' else '' }}">🎯 闯关答题</a>
+      <a href="/progress" class="{{ 'active' if active_page == 'progress' else '' }}">📊 我的进度</a>
+    </nav>
+    <div class="sb-sep">管理</div>
+    <nav class="side-nav">
+      <a href="/qbank" class="{{ 'active' if active_page == 'qbank' else '' }}">📝 题库管理</a>
+      <a href="/admin" class="{{ 'active' if active_page == 'admin' else '' }}">🗂️ 词库管理</a>
+      <a href="/settings" class="{{ 'active' if active_page == 'settings' else '' }}">⚙️ 系统设置</a>
+    </nav>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content-col">
+    <!-- Loading overlay - 仅覆盖内容区，不覆盖侧边栏 -->
+    <div id="loading-overlay" class="htmx-indicator">
+      <div class="loading-box">
+        <div class="loading-dots">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+        <div class="loading-text">正在查询…</div>
+      </div>
+    </div>
+    {% include content_template %}
+  </main>
+</div>
+</body>
+</html>

@@ -17,6 +17,8 @@ LOOKUP_PROMPT_JSON = """请用JSON格式解释网络用语「{word}」。
   "use_tips": "一句话说明什么时候用、什么时候避免",
   "tags": ["情绪"],
   "related": ["相关词1", "相关词2", "相关词3"],
+  "origin_year": "该词大约在哪一年开始在网络上流行，格式如 2021年，不确定可填空字符串",
+  "origin_platform": "最初流行的平台，如 微博、B站、抖音、微信、知乎 等，不确定可填空字符串",
   "scenarios": [
     {{
       "id": "A",
@@ -36,7 +38,30 @@ LOOKUP_PROMPT_JSON = """请用JSON格式解释网络用语「{word}」。
       "context": "场景背景",
       "dialogue": [
         {{"speaker": "朋友", "text": "对话内容"}},
-        {{"speaker": "我", "text": "包含「{word}」的回复"}}
+        {{"speaker": "我", "text": "包含「{word}」的回复"}},
+        {{"speaker": "朋友", "text": "回应"}}
+      ]
+    }},
+    {{
+      "id": "C",
+      "title": "场景C名称",
+      "emoji": "🏠",
+      "context": "场景背景",
+      "dialogue": [
+        {{"speaker": "角色", "text": "对话内容"}},
+        {{"speaker": "我", "text": "包含「{word}」的回复"}},
+        {{"speaker": "角色", "text": "回应"}}
+      ]
+    }},
+    {{
+      "id": "D",
+      "title": "场景D名称",
+      "emoji": "🎮",
+      "context": "场景背景",
+      "dialogue": [
+        {{"speaker": "角色", "text": "对话内容"}},
+        {{"speaker": "我", "text": "包含「{word}」的回复"}},
+        {{"speaker": "角色", "text": "回应"}}
       ]
     }}
   ]

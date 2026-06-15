@@ -1,0 +1,25 @@
+<!-- CHALLENGE PAGE -->
+<div class="page-scroll">
+  <div class="flex-between mb-3">
+    <div>
+      <h1 class="page-title">🎯 闯关答题</h1>
+      <p class="page-desc">随机从题库抽取 5 题，测试你的网络用语掌握程度</p>
+    </div>
+    <button class="ant-btn ant-btn-primary ant-btn-lg"
+            hx-post="/api/challenge/start"
+            hx-target="#challenge-area"
+            hx-swap="innerHTML">
+      开始闯关 🚀
+    </button>
+  </div>
+  <div id="challenge-area">
+    <div class="ch-question-card" style="text-align:center;padding:48px 32px">
+      <div style="font-size:52px;margin-bottom:16px">🎯</div>
+      <div style="font-size:18px;font-weight:600;color:rgba(0,0,0,.88);margin-bottom:8px">网络用语闯关</div>
+      <div style="font-size:13px;color:rgba(0,0,0,.45);line-height:1.8">
+        每组 5 题 · 从全部词条中随机出题<br>
+        点击上方「开始闯关」按钮开始测试
+      </div>
+    </div>
+  </div>
+</div>

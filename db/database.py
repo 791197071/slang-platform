@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sqlite3
 import json
 from pathlib import Path
@@ -58,6 +59,9 @@ def init_db():
         "ALTER TABLE words ADD COLUMN status TEXT DEFAULT 'approved'",
         "ALTER TABLE words ADD COLUMN is_ai_generated INTEGER DEFAULT 0",
         "ALTER TABLE words ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "ALTER TABLE words ADD COLUMN origin_year TEXT DEFAULT ''",
+        "ALTER TABLE words ADD COLUMN origin_platform TEXT DEFAULT ''",
+        "ALTER TABLE words ADD COLUMN in_challenge INTEGER DEFAULT 1",
     ]:
         try:
             cur.execute(col_sql)
@@ -71,8 +75,8 @@ def init_db():
         for e in entries:
             cur.execute(
                 "INSERT OR IGNORE INTO words "
-                "(word, meaning, tags, sentiment, scenarios, related, use_tips, quality_score, status) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, 7.0, 'approved')",
+                "(word, meaning, tags, sentiment, scenarios, related, use_tips, quality_score, status, origin_year, origin_platform) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, 7.0, 'approved', ?, ?)",
                 (
                     e["word"], e["meaning"],
                     json.dumps(e.get("tags", []), ensure_ascii=False),
@@ -80,6 +84,8 @@ def init_db():
                     json.dumps(e.get("scenarios", []), ensure_ascii=False),
                     json.dumps(e.get("related", []), ensure_ascii=False),
                     e.get("use_tips", ""),
+                    e.get("origin_year", ""),
+                    e.get("origin_platform", ""),
                 ),
             )
     conn.commit()
@@ -167,14 +173,16 @@ def save_generated_word(word_data: dict):
     cur = conn.cursor()
     cur.execute(
         """INSERT INTO words
-               (word, meaning, tags, sentiment, scenarios, related, use_tips, quality_score, status, is_ai_generated)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 1)
+               (word, meaning, tags, sentiment, scenarios, related, use_tips, quality_score, status, is_ai_generated, origin_year, origin_platform)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 1, ?, ?)
            ON CONFLICT(word) DO UPDATE SET
-               meaning         = excluded.meaning,
-               scenarios       = excluded.scenarios,
-               use_tips        = excluded.use_tips,
-               is_ai_generated = 1,
-               status          = CASE WHEN status = 'approved' THEN 'approved' ELSE 'pending' END
+               meaning          = excluded.meaning,
+               scenarios        = excluded.scenarios,
+               use_tips         = excluded.use_tips,
+               origin_year      = excluded.origin_year,
+               origin_platform  = excluded.origin_platform,
+               is_ai_generated  = 1,
+               status           = CASE WHEN status = 'approved' THEN 'approved' ELSE 'pending' END
         """,
         (
             word_data["word"],
@@ -185,6 +193,8 @@ def save_generated_word(word_data: dict):
             json.dumps(word_data.get("related", []), ensure_ascii=False),
             word_data.get("use_tips", ""),
             word_data.get("quality_score", 7.0),
+            word_data.get("origin_year", ""),
+            word_data.get("origin_platform", ""),
         ),
     )
     conn.commit()
@@ -326,6 +336,66 @@ def get_user_stats() -> dict:
         "ai_count": ai_count,
         "pending_count": pending_count,
     }
+
+
+# ── 题库管理 ──────────────────────────────────────────────
+
+def get_words_for_challenge(limit: int = 50) -> list:
+    conn = _conn()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM words WHERE status = 'approved' AND in_challenge = 1 "
+        "ORDER BY quality_score DESC, RANDOM() LIMIT ?",
+        (limit,),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return [_row_to_dict(r) for r in rows]
+
+
+def get_qbank_words(search: str = "", filter_mode: str = "全部") -> list:
+    conn = _conn()
+    cur = conn.cursor()
+    conds, params = ["status = 'approved'"], []
+    if search:
+        conds.append("(word LIKE ? OR meaning LIKE ?)")
+        params += [f"%{search}%", f"%{search}%"]
+    if filter_mode == "在题库":
+        conds.append("in_challenge = 1")
+    elif filter_mode == "未入库":
+        conds.append("in_challenge = 0")
+    where = "WHERE " + " AND ".join(conds)
+    cur.execute(
+        f"SELECT word, meaning, quality_score, in_challenge FROM words {where} "
+        f"ORDER BY quality_score DESC",
+        params,
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return [
+        [r[0], (r[1][:28] + "…") if len(r[1]) > 30 else r[1],
+         f"{r[2]:.1f}", "✅ 在题库" if r[3] else "⭕ 未入库"]
+        for r in rows
+    ]
+
+
+def toggle_challenge_word(word: str, enabled: bool):
+    conn = _conn()
+    cur = conn.cursor()
+    cur.execute("UPDATE words SET in_challenge = ? WHERE word = ?", (1 if enabled else 0, word))
+    conn.commit()
+    conn.close()
+
+
+def get_qbank_stats() -> dict:
+    conn = _conn()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM words WHERE status = 'approved'")
+    total = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM words WHERE status = 'approved' AND in_challenge = 1")
+    active = cur.fetchone()[0]
+    conn.close()
+    return {"total": total, "active": active, "inactive": total - active}
 
 
 def save_challenge_progress(theme: str, group: int, correct: int, total: int):

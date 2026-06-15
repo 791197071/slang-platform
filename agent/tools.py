@@ -1,6 +1,7 @@
 """
-工具函数层：词库查找、AI 调用、渲染、Mock 生成
+工具函数层：词库查找、AI 调用、Mock 生成、闯关题目构建
 """
+from __future__ import annotations
 import json
 import random
 import re
@@ -11,139 +12,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from db import database as db
 
-SENTIMENT_LABEL = {
-    "positive": "正向 😊",
-    "negative": "负向 😔",
-    "neutral":  "中性 😐",
-}
-
-THEME_TAG_MAP = {
-    "职场黑话": "职场",
-    "恋爱俚语": "恋爱",
-    "饭圈用语": "饭圈",
-    "情绪表达": "情绪",
-    "日常搞笑": "搞笑",
-}
-
 
 # ── 词条检索 ──────────────────────────────────────────────
 
 def retrieve_word(word: str) -> dict | None:
-    result = db.search_word(word)
-    if result:
-        return result
-    candidates = db.fuzzy_search(word, limit=1)
-    return candidates[0] if candidates else None
+    return db.search_word(word)
 
 
 def get_recommendations(related_list: list, exclude: str = "") -> list:
     filtered = [w for w in related_list if w != exclude][:4]
     return db.get_related_words(filtered)
 
-
-# ── HTML 渲染 ─────────────────────────────────────────────
-
-def render_word_card(word_data: dict) -> str:
-    word     = word_data["word"]
-    meaning  = word_data["meaning"]
-    sentiment = SENTIMENT_LABEL.get(word_data.get("sentiment", "neutral"), "中性 😐")
-    use_tips  = word_data.get("use_tips", "")
-    scenarios = word_data.get("scenarios", [])
-    related   = word_data.get("related", [])
-    is_ai     = word_data.get("is_ai_generated", 0)
-    quality   = word_data.get("quality_score", 5.0)
-
-    ai_badge = ""
-    if is_ai:
-        status = word_data.get("status", "pending")
-        label  = "⏳ AI生成·待审核" if status == "pending" else "✅ AI生成·已审核"
-        ai_badge = f'<span class="ai-source-badge">{label}</span>'
-
-    scenario_html = ""
-    for s in scenarios:
-        lines = ""
-        for d in s.get("dialogue", []):
-            cls = "self-msg" if d["speaker"] == "我" else "other-msg"
-            lines += (
-                f'<div class="msg {cls}">'
-                f'<span class="speaker">{d["speaker"]}：</span>{d["text"]}</div>'
-            )
-        scenario_html += f"""
-<div class="scenario-card">
-  <div class="scene-header">{s.get('emoji','🎬')} 场景{s.get('id','A')} · {s.get('title','')}</div>
-  <div class="scene-context">📍 {s.get('context','')}</div>
-  <div class="dialogue-box">{lines}</div>
-</div>"""
-
-    related_tags = "".join(
-        f'<span class="tag-btn">{w}</span>' for w in related
-    )
-
-    tips_html = f'<div class="tips-box">💡 {use_tips}</div>' if use_tips else ""
-    rel_html  = (
-        f'<div class="related-section"><span class="related-label">相关词：</span>{related_tags}</div>'
-        if related else ""
-    )
-    score_html = f'<div class="quality-score">质量分 {quality:.1f}/10</div>'
-
-    return f"""
-<div class="word-card">
-  <div class="word-card-header">
-    <div class="word-title">{word}</div>
-    <div style="display:flex;gap:8px;align-items:center">{ai_badge}{score_html}</div>
-  </div>
-  <div class="sentiment-badge">{sentiment}</div>
-  <div class="word-meaning">📖 {meaning}</div>
-  {scenario_html}
-  {tips_html}
-  {rel_html}
-</div>"""
-
-
-def render_not_found(word: str) -> str:
-    return f"""
-<div class="display-placeholder">
-  <div class="placeholder-icon">🔍</div>
-  <div class="placeholder-title">「{word}」暂未收录</div>
-  <div class="placeholder-desc">
-    {'开启 AI 模式后可实时生成～填入 DeepSeek API Key 即可' if True else ''}
-  </div>
-  <div class="placeholder-examples">试试：破防了 · 内卷 · YYDS · 社死 · 塌房</div>
-</div>"""
-
-
-def render_ai_text(word: str, text: str) -> str:
-    """将 DS 返回的 Markdown 文本包装成卡片（JSON 解析失败时的兜底）。"""
-    return f"""
-<div class="word-card">
-  <div class="word-card-header">
-    <div class="word-title">{word}</div>
-    <span class="ai-source-badge">🤖 AI 生成</span>
-  </div>
-  <div class="word-meaning" style="white-space:pre-wrap;line-height:1.8">{text}</div>
-</div>"""
-
-
-def render_initial_display() -> str:
-    return """
-<div class="display-placeholder">
-  <div class="placeholder-icon">👩‍🏫</div>
-  <div class="placeholder-title">在左侧输入网络用语</div>
-  <div class="placeholder-desc">词条解释和对话场景会展示在这里</div>
-  <div class="placeholder-examples">试试：破防了 · 内卷 · YYDS · 社死 · 塌房 · 摆烂</div>
-</div>"""
-
-
-# ── Mock 生成（无 API Key） ───────────────────────────────
-
 def mock_generate(word: str) -> dict | None:
-    candidates = db.fuzzy_search(word, limit=3)
-    if candidates:
-        base = candidates[0].copy()
-        base["word"] = word
-        base["meaning"] = f"（Mock）「{word}」是一个网络用语，具体含义正在收录中。"
-        base["is_ai_generated"] = 0
-        return base
     return None
 
 

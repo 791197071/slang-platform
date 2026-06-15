@@ -1,0 +1,18 @@
+<!-- PROGRESS PAGE -->
+<div class="page-scroll">
+  <div class="flex-between mb-3">
+    <div>
+      <h1 class="page-title">📊 我的进度</h1>
+      <p class="page-desc">学习统计与成就记录</p>
+    </div>
+    <button class="ant-btn ant-btn-default ant-btn-sm"
+            hx-get="/api/progress/data"
+            hx-target="#progress-content"
+            hx-swap="innerHTML">
+      🔄 刷新
+    </button>
+  </div>
+  <div id="progress-content" hx-get="/api/progress/data" hx-trigger="load" hx-swap="innerHTML">
+    <div class="ant-card" style="text-align:center;color:rgba(0,0,0,.35)">加载中…</div>
+  </div>
+</div>

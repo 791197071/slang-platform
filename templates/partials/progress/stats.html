@@ -1,0 +1,32 @@
+<!-- Learning Overview -->
+<div class="ant-card">
+  <div class="ant-card-head">
+    <span>学习概览</span>
+  </div>
+  <div class="stats-grid">
+    {{ stats_html | safe }}
+  </div>
+  <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,.88);margin-bottom:8px">最近学习</div>
+  <div style="line-height:2">{{ recent_html | safe }}</div>
+</div>
+
+<!-- QBank Overview -->
+<div class="ant-card">
+  <div class="ant-card-head">
+    <span>题库概况</span>
+  </div>
+  <div style="display:flex;gap:12px">
+    <div style="flex:1;text-align:center">
+      <div class="stat-num">{{ qb_total }}</div>
+      <div class="stat-label">词库总量</div>
+    </div>
+    <div style="flex:1;text-align:center">
+      <div class="stat-num primary">{{ qb_active }}</div>
+      <div class="stat-label">在题库中</div>
+    </div>
+    <div style="flex:1;text-align:center">
+      <div class="stat-num muted">{{ qb_inactive }}</div>
+      <div class="stat-label">未入库</div>
+    </div>
+  </div>
+</div>
